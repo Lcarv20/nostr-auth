@@ -14,12 +14,24 @@ import { AuthTabs } from "@/lib/tabs";
 import { Label } from "@radix-ui/react-label";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { BlocksIcon } from "lucide-react";
+import {
+  BlocksIcon,
+  CopyIcon,
+  EyeIcon,
+  EyeOffIcon,
+  KeyRoundIcon,
+  UserIcon,
+} from "lucide-react";
 import Divider from "@/components/ui/divider";
+import styles from "@/components/neon-border.module.css";
+import { cn } from "@/lib/utils";
+import { useFormState, useFormStatus } from "react-dom";
+import { generateKeys } from "@/actions/register";
+import { useCopyToClipboard } from "@/lib/hooks/copy-to-clipboard";
 
-export default function AuthForm() {
+export default function AuthComponent() {
   return (
-    <Tabs defaultValue={AuthTabs.Login} className="w-[400px]">
+    <Tabs defaultValue={AuthTabs.Register} className="w-[400px]">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value={AuthTabs.Login}>
           {AuthTabs.Login.toUpperCase()}
@@ -60,45 +72,128 @@ function LoginUI() {
 
         <form action="#" className="flex flex-col gap-4">
           <div className="space-y-2">
-            <Label htmlFor="private-key">Private Key</Label>
+            <Label htmlFor="private-key" className="flex gap-2">
+              <KeyRoundIcon />
+              Private Key
+            </Label>
             <Input
               id="private-key"
               type="password"
               placeholder="nsek123hasf..."
             />
           </div>
-          <Button type="submit" className="self-end">Save changes</Button>
+          <Button type="submit" className="self-end">
+            Login with private key
+          </Button>
         </form>
       </CardContent>
-      {/* <CardFooter> */}
-      {/*   <Button>Save changes</Button> */}
-      {/* </CardFooter> */}
     </Card>
   );
 }
 
+const initialState = {
+  pk: "",
+  sk: "",
+};
+
 function RegisterUI() {
+  const [formState, formAction] = useFormState(generateKeys, initialState);
+  const [_, copy] = useCopyToClipboard();
+  const [showKey, setShowKey] = React.useState(false);
+
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-2xl">🚀 Rocket Register</CardTitle>
-        <CardDescription>
-          Showcase register with next-auth on nostr.
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-2">
-        <div className="space-y-1">
-          <Label htmlFor="current">Current password</Label>
-          <Input id="current" type="password" />
-        </div>
-        <div className="space-y-1">
-          <Label htmlFor="new">New password</Label>
-          <Input id="new" type="password" />
-        </div>
-      </CardContent>
-      <CardFooter>
-        <Button>Save password</Button>
-      </CardFooter>
-    </Card>
+    <form action={formAction}>
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-2xl">🚀 Rocket Register</CardTitle>
+          <CardDescription>
+            Showcase register with next-auth on nostr.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-2">
+          <div className="space-y-1">
+            <Label htmlFor="publick-key" className="flex gap-2">
+              <UserIcon />
+              Your new public key
+            </Label>
+            <div className="flex border rounded-md pl-2">
+              <Input
+                id="publick-key"
+                type="text"
+                className="border-none"
+                defaultValue={formState.pk}
+                disabled
+              />
+              <Button
+                onClick={() => {
+                  copy(formState.pk);
+                }}
+                type="button"
+                variant="secondary"
+                size="icon"
+              >
+                <CopyIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label htmlFor="secret-key" className="flex gap-2">
+              <KeyRoundIcon />
+              Your new private key
+              <button
+                type="button"
+                className="ml-auto p-1 mr-2"
+                onClick={() => setShowKey(!showKey)}
+              >
+                {showKey ? (
+                  <EyeOffIcon className="w-3 h-3" />
+                ) : (
+                  <EyeIcon className="w-3 h-3" />
+                )}
+              </button>
+            </Label>
+
+            <div className="flex border rounded-md pl-2">
+              <Input
+                id="secret-key"
+                type={showKey ? "text" : "password"}
+                className="border-none"
+                defaultValue={formState.sk.toString()}
+                disabled
+              />
+              <Button
+                onClick={() => {
+                  copy(formState.sk.toString());
+                }}
+                type="button"
+                variant="secondary"
+                size="icon"
+              >
+                <CopyIcon className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+        <CardFooter>
+          <GenerateButton />
+        </CardFooter>
+      </Card>
+    </form>
+  );
+}
+
+function GenerateButton() {
+  const { pending } = useFormStatus();
+  return (
+    <div data-generating={pending} className={cn(styles.glow, styles.block)}>
+      <Button
+        disabled={pending}
+        type="submit"
+        className={cn("w-full z-10", pending && styles.active)}
+      >
+        {pending ? "Generating..." : "Generate"}
+      </Button>
+    </div>
   );
 }
