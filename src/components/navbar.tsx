@@ -7,7 +7,7 @@ export default function Navbar() {
   return (
     <nav className={cn("p-4 border-b", "flex")}>
       <h1 className="text-3xl font-bold font-serif relative">
-        <VenetianMaskIcon className="w-6 h-6 absolute -right-3 -top-0.5 rotate-12 z-10 text-purple-900" />
+        <VenetianMaskIcon className="w-6 h-6 absolute -right-3 -top-0.5 rotate-12 z-10" />
         NAuth
       </h1>
       <div className="ml-auto">
