@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { cn } from "@/lib/utils";
 import Navbar from "@/components/navbar";
+import AuthProvider from "@/lib/providers/auth-provider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -18,7 +19,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={cn(inter.className)}>
         <ThemeProvider
           attribute="class"
@@ -26,12 +27,12 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <main
-            className="h-screen flex container mx-auto flex-col pt-8"
-          >
-            <Navbar />
-            {children}
-          </main>
+          <AuthProvider>
+            <main className="h-screen flex container mx-auto flex-col pt-8">
+              <Navbar />
+              {children}
+            </main>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

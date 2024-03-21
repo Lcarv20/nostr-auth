@@ -28,10 +28,19 @@ import { cn } from "@/lib/utils";
 import { useFormState, useFormStatus } from "react-dom";
 import { generateKeys } from "@/actions/register";
 import { useCopyToClipboard } from "@/lib/hooks/copy-to-clipboard";
+import { loginWithExtension } from "@/lib/nostr/client-authentication";
+import { useSession } from "next-auth/react";
+import { redirect } from "next/navigation";
 
 export default function AuthComponent() {
+  const { data: session } = useSession();
+
+  if (session) {
+    redirect("/user");
+  }
+
   return (
-    <Tabs defaultValue={AuthTabs.Register} className="w-[400px]">
+    <Tabs defaultValue={AuthTabs.Login} className="w-[400px]">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value={AuthTabs.Login}>
           {AuthTabs.Login.toUpperCase()}
@@ -62,7 +71,8 @@ function LoginUI() {
       </CardHeader>
       <CardContent className="">
         <div>
-          <Button className="w-full gap-2">
+          <Button onClick={loginWithExtension} className="w-full gap-2">
+            {/* <Button className="w-full gap-2"> */}
             <BlocksIcon />
             Login with extension
           </Button>
